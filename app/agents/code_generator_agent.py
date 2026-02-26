@@ -5,7 +5,7 @@ from app.utils.logger import get_logger
 
 logger = get_logger(__name__)
 
-logger.info("Running Code Generator Agent", extra={"trace_id": "system"})
+logger.info("Running Code Generator Agent")
 
 
 class CodeGeneratorAgent(BaseAgent):
@@ -14,16 +14,36 @@ class CodeGeneratorAgent(BaseAgent):
 
     async def run(self, input_data: dict) -> dict:
         research_content = input_data.get("research")
+        if not research_content:
+            raise ValueError("Research content is required")
 
         prompt = f"""
-        Based on the following research:
+        You are a senior Python software engineer.
 
+        Based on the research below, generate production-ready Python code.
+
+        Research:
         {research_content}
 
-        Generate clean, production-level Python code.
-        Follow best practices and modular design.
+        Requirements:
+        - Follow SOLID principles
+        - Use modular design
+        - Use type hints
+        - Include docstrings
+        - Add proper error handling
+        - Follow PEP8 guidelines
+
+        Output Rules:
+        - Only return valid Python code.
+        - Do NOT include explanations.
+        - Do NOT include markdown.
+        - Code must be executable.
         """
 
-        response = await call_llm(prompt)
+        try:
+            response = await call_llm(prompt)
+        except Exception as e:
+            logger.error("LLM call failed", exc_info=True)
+            raise
 
         return {"generated_code": response}

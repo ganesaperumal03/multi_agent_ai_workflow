@@ -1,35 +1,34 @@
 # ==============================
 # Core Backend
 # ==============================
-fastapi==0.111.0
-uvicorn[standard]==0.30.1
+fastapi
 
 # ==============================
 # LLM & AI
 # ==============================
-openai==1.35.7
-langchain==0.2.5
-langgraph==0.0.64
-crewai==0.28.8
+openai
+langchain
+langgraph
+crewai
 
 # ==============================
 # Async & Utilities
 # ==============================
-httpx==0.27.0
-asyncio==3.4.3
+httpx
+asyncio
 
 # ==============================
 # Data Validation
 # ==============================
-pydantic==2.7.4
-pydantic-settings==2.3.4
+pydantic
+pydantic-settings
 
 # ==============================
 # Database
 # ==============================
-sqlalchemy==2.0.30
-asyncpg==0.29.0
-psycopg2-binary==2.9.9
+sqlalchemy
+asyncpg
+# psycopg2-binary==2.9.9
 
 # ==============================
 # Redis (Async)

@@ -13,19 +13,53 @@ class ResearchAgent(BaseAgent):
 
     async def run(self, input_data: dict) -> dict:
         topic = input_data.get("topic")
+        if not topic:
+            raise ValueError("topic  is required")
 
         prompt = f"""
-        You are an expert technical researcher.
-        Conduct detailed research on: {topic}
+        You are a senior technical research analyst.
 
-        Provide:
-        - Key concepts
-        - Important techniques
-        - Best practices
-        - Challenges
-        - Real-world applications
+        Conduct in-depth research on the topic below.
+
+        Topic:
+        {topic}
+
+        Instructions:
+        - Be precise and structured.
+        - Use clear headings.
+        - Use bullet points where appropriate.
+        - Avoid vague explanations.
+
+        Output Format (strictly follow this structure):
+
+        ## Overview
+        Brief introduction to the topic.
+
+        ## Key Concepts
+        - Concept 1
+        - Concept 2
+        - Concept 3
+
+        ## Important Techniques
+        - Technique 1
+        - Technique 2
+
+        ## Best Practices
+        - Practice 1
+        - Practice 2
+
+        ## Challenges
+        - Challenge 1
+        - Challenge 2
+
+        ## Real-World Applications
+        - Application 1
+        - Application 2
         """
-
-        response = await call_llm(prompt)
+        try:
+            response = await call_llm(prompt)
+        except Exception as e:
+            logger.error("LLM call failed", exc_info=True)
+            raise
 
         return {"research": response}

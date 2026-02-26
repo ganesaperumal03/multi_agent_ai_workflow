@@ -24,8 +24,9 @@ class OutputValidator:
     def validate(schema, data: dict):
         try:
             validated = schema(**data)
-            return validated.dict()
+            return validated.model_dump()
         except ValidationError as e:
             return {
-                "validation_error": str(e)
+                "status": "failed",
+                "validation_error": e.errors()
             }

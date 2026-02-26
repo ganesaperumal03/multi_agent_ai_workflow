@@ -27,18 +27,21 @@ async def run_crewai(topic: str):
     )
 
     research_task = Task(
-        description=f"Research about {topic}",
-        agent=research_agent,
-    )
+    description=f"Research in detail about {topic}",
+    agent=research_agent,
+    expected_output="Structured research findings"
+)
 
     code_task = Task(
-        description="Generate Python code based on research",
+        description="Generate production-level Python code using research findings.",
         agent=code_agent,
+        context=[research_task],
     )
 
     review_task = Task(
-        description="Review the generated code",
+        description="Review the generated code and provide structured feedback.",
         agent=review_agent,
+        context=[code_task],
     )
 
     crew = Crew(

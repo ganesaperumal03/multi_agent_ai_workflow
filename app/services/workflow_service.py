@@ -6,7 +6,12 @@ from app.evaluation.output_validator import (
     RefactorOutputSchema,
     DocumentationOutputSchema
 )
+from app.agents.agent_registry import get_all_agents
 
+
+import asyncio
+from app.agents.agent_registry import get_all_agents
+from app.memory.redis_memory import RedisMemory
 
 class WorkflowService:
 
@@ -25,7 +30,11 @@ class WorkflowService:
         review_task = self.agents["review"].run(code_validated)
         refactor_task = self.agents["refactor"].run(code_validated)
 
-        review, refactor = await asyncio.gather(review_task, refactor_task)
+        review, refactor = await asyncio.gather(
+            review_task,
+            refactor_task,
+            return_exceptions=True
+        )
 
         review_validated = OutputValidator.validate(ReviewOutputSchema, review)
         refactor_validated = OutputValidator.validate(RefactorOutputSchema, refactor)

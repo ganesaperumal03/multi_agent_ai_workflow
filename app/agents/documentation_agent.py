@@ -13,20 +13,46 @@ class DocumentationAgent(BaseAgent):
 
     async def run(self, input_data: dict) -> dict:
         refactored_code = input_data.get("refactored_code")
+        if not refactored_code:
+            raise ValueError("refactored_code content is required")
 
         prompt = f"""
-        Generate professional documentation for the following code:
+        You are a technical documentation specialist.
 
+        Generate professional documentation for the following Python code.
+
+        Code:
         {refactored_code}
 
-        Include:
-        - Overview
-        - Installation
-        - Usage
-        - API reference
-        - Example usage
+        Requirements:
+        - Clear and concise language
+        - Suitable for GitHub README
+        - Structured with markdown headings
+
+        Output Format:
+
+        # Project Title
+
+        ## Overview
+        Brief description of the project.
+
+        ## Installation
+        Step-by-step installation instructions.
+
+        ## Usage
+        How to run and use the project.
+
+        ## API Reference
+        Explain important classes and functions.
+
+        ## Example Usage
+        Provide a working example.
         """
 
-        response = await call_llm(prompt)
+        try:
+            response = await call_llm(prompt)
+        except Exception as e:
+            logger.error("LLM call failed", exc_info=True)
+            raise
 
         return {"documentation": response}

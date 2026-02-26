@@ -13,19 +13,42 @@ class ReviewAgent(BaseAgent):
 
     async def run(self, input_data: dict) -> dict:
         code = input_data.get("generated_code")
+        if not code:
+            raise ValueError("code is required")
 
         prompt = f"""
-        Review the following Python code:
+        You are a senior Python code auditor.
+
+        Review the following code:
 
         {code}
 
-        Provide:
-        - Code quality assessment
-        - Security concerns
-        - Performance issues
-        - Improvement suggestions
+        Provide structured feedback in this format:
+
+        ## Code Quality Assessment
+        - Clarity:
+        - Maintainability:
+        - Structure:
+
+        ## Security Concerns
+        - Issue 1:
+        - Issue 2:
+
+        ## Performance Issues
+        - Issue 1:
+        - Issue 2:
+
+        ## Improvement Suggestions
+        - Suggestion 1:
+        - Suggestion 2:
+
+        Be specific and actionable.
         """
 
-        response = await call_llm(prompt)
+        try:
+            response = await call_llm(prompt)
+        except Exception as e:
+            logger.error("LLM call failed", exc_info=True)
+            raise
 
         return {"review_feedback": response}
