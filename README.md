@@ -333,6 +333,14 @@ It reflects real-world AI platform engineering practices beyond simple chatbot i
 
 ---
 
+## Author
+
+**Ganesaperumal S**
+AI/ML Engineer | GenAI Systems Developer
+Specialized in multi-agent architectures, RAG pipelines, and AI workflow engineering.
+
+---
+
 ## License
 
 MIT License
