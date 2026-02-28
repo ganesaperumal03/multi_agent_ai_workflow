@@ -12,7 +12,7 @@ This project demonstrates how to design and implement a scalable, production-rea
 - LLM-based evaluation scoring
 - JSON schema output validation
 - Memory persistence with Redis
-- Workflow orchestration using LangGraph and CrewAI
+- Workflow orchestration using LangGraph, CrewAI, and a custom Orchestrator
 - FastAPI-based async backend
 - PostgreSQL integration
 - Dockerized deployment
@@ -62,12 +62,21 @@ Each agent operates independently and communicates via structured state objects.
 
 ## Workflow Engines
 
-The system supports environment-based engine switching:
+The system supports **three** workflow engines, selectable via the `WORKFLOW_ENGINE` environment variable:
+
+| Engine         | Value          | Description                                                  |
+| -------------- | -------------- | ------------------------------------------------------------ |
+| LangGraph      | `langgraph`    | Graph-based orchestration with state management              |
+| CrewAI         | `crewai`       | Role-based multi-agent framework with sequential processing  |
+| Orchestrator   | `orchestrator` | Custom async service with parallel agent execution           |
 
 ```env
+# Choose your workflow engine
 WORKFLOW_ENGINE=langgraph
 # or
 WORKFLOW_ENGINE=crewai
+# or
+WORKFLOW_ENGINE=orchestrator
 ```
 
 This demonstrates:
@@ -86,6 +95,7 @@ This demonstrates:
 - FastAPI (async)
 - LangGraph
 - CrewAI
+- Groq LLM (Meta LLaMA 4 Scout)
 
 ### Infrastructure
 
@@ -108,57 +118,55 @@ This demonstrates:
 
 ```
 multi_agent_ai_workflow/
-|
-+-- app/
-|   +-- main.py
-|   +-- config.py
-|   +-- dependencies.py
-|   |
-|   +-- api/
-|   |   +-- routes.py
-|   |   +-- schemas.py
-|   |
-|   +-- agents/
-|   |   +-- base_agent.py
-|   |   +-- research_agent.py
-|   |   +-- code_generator_agent.py
-|   |   +-- review_agent.py
-|   |   +-- refactor_agent.py
-|   |   +-- documentation_agent.py
-|   |   +-- agent_registry.py
-|   |
-|   +-- database/
-|   |   +-- db_session.py
-|   |   +-- models.py
-|   |   +-- crud.py
-|   |
-|   +-- workflows/
-|   |   +-- workflow_selector.py
-|   |   +-- langgraph_workflow.py
-|   |   +-- crewai_workflow.py
-|   |   +-- state_manager.py
-|   |
-|   +-- memory/
-|   |   +-- redis_memory.py
-|   |
-|   +-- evaluation/
-|   |   +-- agent_scorer.py
-|   |   +-- output_validator.py
-|   |
-|   +-- services/
-|   |   +-- workflow_service.py
-|   |
-|   +-- utils/
-|       +-- llm_provider.py
-|       +-- logger.py
-|
-+-- docker/
-|   +-- Dockerfile
-|   +-- docker-compose.yml
-|
-+-- requirements.txt
-+-- .env
-+-- README.md
+│
+├── app/
+│   ├── main.py                  # FastAPI app entry point + middleware
+│   ├── config.py                # Pydantic settings (env-based config)
+│   ├── dependencies.py          # Dependency injection (DB session)
+│   │
+│   ├── api/
+│   │   ├── routes.py            # API endpoints (/execute)
+│   │   └── schemas.py           # Request/response Pydantic models
+│   │
+│   ├── agents/
+│   │   ├── base_agent.py        # Abstract base agent class
+│   │   ├── research_agent.py    # Research specialist agent
+│   │   ├── code_generator_agent.py  # Code generation agent
+│   │   ├── review_agent.py      # Code review agent
+│   │   ├── refactor_agent.py    # Code refactoring agent
+│   │   ├── documentation_agent.py   # Documentation agent
+│   │   └── agent_registry.py   # Agent factory/registry
+│   │
+│   ├── database/
+│   │   ├── db_session.py        # Async SQLAlchemy engine + session
+│   │   ├── models.py            # WorkflowRun ORM model
+│   │   └── crud.py              # Database CRUD operations
+│   │
+│   ├── workflows/
+│   │   ├── workflow_selector.py # Engine router (langgraph/crewai/orchestrator)
+│   │   ├── langgraph_workflow.py    # LangGraph-based workflow
+│   │   ├── crewai_workflow.py       # CrewAI-based workflow
+│   │   └── state_manager.py    # Workflow state TypedDict
+│   │
+│   ├── memory/
+│   │   └── redis_memory.py      # Redis-based session memory
+│   │
+│   ├── evaluation/
+│   │   ├── agent_scorer.py      # LLM-based output scoring
+│   │   └── output_validator.py  # JSON schema validation
+│   │
+│   ├── services/
+│   │   └── workflow_service.py  # Orchestrator workflow service
+│   │
+│   └── utils/
+│       ├── llm_provider.py      # LLM API abstraction layer
+│       └── logger.py            # Structured logging setup
+│
+├── Dockerfile                   # Container image definition
+├── docker-compose.yml           # Multi-service orchestration
+├── requirements.txt             # Python dependencies
+├── .env                         # Environment variables
+└── README.md
 ```
 
 Clean separation of:
@@ -169,6 +177,74 @@ Clean separation of:
 - Evaluation layer
 - API layer
 - Infrastructure configuration
+
+---
+
+## Environment Variables
+
+Create a `.env` file in the project root with the following variables:
+
+```env
+# ==============================
+# LLM Configuration (Required)
+# ==============================
+GROQ_API_KEY=your_groq_api_key_here
+LLM_PROVIDER=groq
+GROQ_MODEL=meta-llama/llama-4-scout-17b-16e-instruct
+
+# ==============================
+# Workflow Engine (Required)
+# ==============================
+# Options: langgraph | crewai | orchestrator
+WORKFLOW_ENGINE=orchestrator
+
+# ==============================
+# Database (Required)
+# ==============================
+DATABASE_URL=postgresql://user:password@postgres:5432/db
+
+# ==============================
+# Redis (Required)
+# ==============================
+REDIS_URL=redis://redis:6379
+```
+
+| Variable          | Description                                      | Required | Default         |
+| ----------------- | ------------------------------------------------ | -------- | --------------- |
+| `GROQ_API_KEY`    | API key for Groq LLM provider                   | Yes      | —               |
+| `LLM_PROVIDER`    | LLM backend to use                               | No       | `groq`          |
+| `GROQ_MODEL`      | Model identifier for Groq                        | No       | `meta-llama/llama-4-scout-17b-16e-instruct` |
+| `WORKFLOW_ENGINE` | Workflow engine: `langgraph`, `crewai`, or `orchestrator` | No | `orchestrator` |
+| `DATABASE_URL`    | PostgreSQL connection string                     | No       | `postgresql://user:password@localhost/db` |
+| `REDIS_URL`       | Redis connection string                          | No       | `redis://localhost:6379` |
+
+> **Note:** When running with Docker Compose, use `postgres` and `redis` as hostnames (service names) instead of `localhost`.
+
+---
+
+## Docker Setup
+
+### Dockerfile
+
+The application uses a multi-stage production-ready Dockerfile:
+
+- **Base image:** `python:3.11-slim`
+- **System deps:** `build-essential`, `curl`
+- **App server:** Uvicorn on port `8000`
+- Bytecode generation disabled (`PYTHONDONTWRITEBYTECODE=1`)
+- Unbuffered output for real-time logging (`PYTHONUNBUFFERED=1`)
+
+### Docker Compose Services
+
+The `docker-compose.yml` defines three services:
+
+| Service    | Image              | Port   | Description                    |
+| ---------- | ------------------ | ------ | ------------------------------ |
+| `api`      | Built from `./`    | `8000` | FastAPI application server     |
+| `redis`    | `redis:7`          | —      | In-memory store for agent memory |
+| `postgres` | `postgres:15`      | `5432` | Persistent database for workflow runs |
+
+Access the API docs at: **http://localhost:8000/docs**
 
 ---
 
@@ -229,26 +305,6 @@ Content-Type: application/json
   }
 }
 ```
-
----
-
-## Run the App
-
-```bash
-python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
-```
-
-Access the API docs at: http://localhost:8000/docs
-
----
-
-## Running with Docker
-
-```bash
-docker-compose up --build
-```
-
-Access the API docs at: http://localhost:8000/docs
 
 ---
 

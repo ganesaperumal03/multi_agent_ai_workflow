@@ -1,14 +1,16 @@
 from crewai import Agent, Task, Crew, Process, LLM
 from app.config import settings
 import asyncio
+from app.evaluation.agent_scorer import AgentScorer
 
 
 async def run_crewai(topic: str):
 
+
     llm = LLM(
-        model=settings.GROQ_MODEL,
+        model=f"groq/{settings.GROQ_MODEL}",
+        temperature=0.1,
         api_key=settings.GROQ_API_KEY,
-        base_url="https://api.groq.com/openai/v1"
     )
 
     research_agent = Agent(
@@ -45,12 +47,14 @@ async def run_crewai(topic: str):
         description="Generate production-level Python code using research findings.",
         agent=code_agent,
         context=[research_task],
+        expected_output="Clean, production-ready Python code with proper structure and documentation",
     )
 
     review_task = Task(
         description="Review the generated code and provide structured feedback.",
         agent=review_agent,
         context=[code_task],
+        expected_output="Detailed code review with suggestions for improvements, security issues, and best practices",
     )
 
     crew = Crew(
@@ -61,4 +65,15 @@ async def run_crewai(topic: str):
 
     result = await asyncio.to_thread(crew.kickoff)
 
-    return {"crewai_output": result}
+    scorer = AgentScorer()
+
+    score = await scorer.score_output(
+        str(result),
+        "Technical documentation quality"
+    )
+
+    return {
+        "crewai_output": result,
+        "evaluation_score": score
+    }
+

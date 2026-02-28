@@ -10,6 +10,8 @@ openai
 langchain
 langgraph
 crewai
+groq
+litellm
 
 # ==============================
 # Async & Utilities
@@ -28,25 +30,24 @@ pydantic-settings
 # ==============================
 sqlalchemy
 asyncpg
-# psycopg2-binary==2.9.9
 
 # ==============================
 # Redis (Async)
 # ==============================
-redis==5.0.4
+redis
 
 # ==============================
 # Environment Variables
 # ==============================
-python-dotenv==1.0.1
+python-dotenv
 
 # ==============================
 # Logging & Monitoring
 # ==============================
-structlog==24.1.0
+structlog
 
 # ==============================
 # Testing
 # ==============================
-pytest==8.2.2
-pytest-asyncio==0.23.7
+pytest
+pytest-asyncio

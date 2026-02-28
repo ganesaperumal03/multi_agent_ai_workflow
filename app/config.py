@@ -9,7 +9,7 @@ class Settings(BaseSettings):
     GROQ_API_KEY: str
     GROQ_MODEL: str = "meta-llama/llama-4-scout-17b-16e-instruct"
 
-    WORKFLOW_ENGINE: str = "crewai"
+    WORKFLOW_ENGINE: str = "orchestrator"
 
     REDIS_URL: str = "redis://localhost:6379"
     DATABASE_URL: str = "postgresql://user:password@localhost/db"
