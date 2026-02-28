@@ -4,7 +4,6 @@ from app.utils.logger import get_logger
 
 logger = get_logger(__name__)
 
-logger.info("Running Research Agent", extra={"trace_id": "system"})
 
 
 class ResearchAgent(BaseAgent):
@@ -12,6 +11,8 @@ class ResearchAgent(BaseAgent):
         super().__init__("ResearchAgent")
 
     async def run(self, input_data: dict) -> dict:
+        logger.info("Running Research Agent")
+
         topic = input_data.get("topic")
         if not topic:
             raise ValueError("topic  is required")

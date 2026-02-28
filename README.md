@@ -86,7 +86,6 @@ This demonstrates:
 - FastAPI (async)
 - LangGraph
 - CrewAI
-- OpenAI API
 
 ### Infrastructure
 
@@ -113,6 +112,7 @@ multi_agent_ai_workflow/
 +-- app/
 |   +-- main.py
 |   +-- config.py
+|   +-- dependencies.py
 |   |
 |   +-- api/
 |   |   +-- routes.py
@@ -126,6 +126,11 @@ multi_agent_ai_workflow/
 |   |   +-- refactor_agent.py
 |   |   +-- documentation_agent.py
 |   |   +-- agent_registry.py
+|   |
+|   +-- database/
+|   |   +-- db_session.py
+|   |   +-- models.py
+|   |   +-- crud.py
 |   |
 |   +-- workflows/
 |   |   +-- workflow_selector.py
@@ -224,6 +229,16 @@ Content-Type: application/json
   }
 }
 ```
+
+---
+
+## Run the App
+
+```bash
+python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+Access the API docs at: http://localhost:8000/docs
 
 ---
 

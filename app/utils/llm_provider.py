@@ -1,8 +1,8 @@
-from groq import groq
+from groq import AsyncGroq
 from app.config import settings
 
-client = groq(api_key=settings.GROQ_API_KEY)
 
+client = AsyncGroq(api_key=settings.GROQ_API_KEY)
 
 async def call_llm(prompt: str) -> str:
     response = await client.chat.completions.create(

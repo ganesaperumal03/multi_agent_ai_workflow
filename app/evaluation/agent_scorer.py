@@ -1,6 +1,6 @@
 import json
 from app.utils.llm_provider import call_llm
-
+import re
 
 class AgentScorer:
 
@@ -27,14 +27,25 @@ class AgentScorer:
             "overall_score": float
         }}
 
+        Do NOT include markdown.
+        Do NOT include explanations.
+        Do NOT include extra text.
+
         Output to evaluate:
         {output}
         """
 
         response = await call_llm(prompt)
 
+        #  Extract JSON block safely
         try:
-            return json.loads(response)
+            json_match = re.search(r"\{.*\}", response, re.DOTALL)
+            if not json_match:
+                raise ValueError("No JSON found")
+
+            clean_json = json_match.group(0)
+            return json.loads(clean_json)
+
         except Exception:
             return {
                 "quality": 0,

@@ -4,7 +4,7 @@ from app.utils.logger import get_logger
 
 logger = get_logger(__name__)
 
-logger.info("Running Refactor Agent", extra={"trace_id": "system"})
+
 
 
 class RefactorAgent(BaseAgent):
@@ -12,6 +12,7 @@ class RefactorAgent(BaseAgent):
         super().__init__("RefactorAgent")
 
     async def run(self, input_data: dict) -> dict:
+        logger.info("Running Refactor Agent")
         code = input_data.get("generated_code")
         if not code:
             raise ValueError("code is required")

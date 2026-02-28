@@ -4,7 +4,6 @@ from app.utils.logger import get_logger
 
 logger = get_logger(__name__)
 
-logger.info("Running Review Agent", extra={"trace_id": "system"})
 
 
 class ReviewAgent(BaseAgent):
@@ -12,6 +11,8 @@ class ReviewAgent(BaseAgent):
         super().__init__("ReviewAgent")
 
     async def run(self, input_data: dict) -> dict:
+        logger.info("Running Review Agent")
+
         code = input_data.get("generated_code")
         if not code:
             raise ValueError("code is required")

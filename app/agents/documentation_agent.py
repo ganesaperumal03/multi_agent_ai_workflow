@@ -4,7 +4,7 @@ from app.utils.logger import get_logger
 
 logger = get_logger(__name__)
 
-logger.info("Running Documentation Agent", extra={"trace_id": "system"})
+
 
 
 class DocumentationAgent(BaseAgent):
@@ -12,6 +12,7 @@ class DocumentationAgent(BaseAgent):
         super().__init__("DocumentationAgent")
 
     async def run(self, input_data: dict) -> dict:
+        logger.info("Running Documentation Agent")
         refactored_code = input_data.get("refactored_code")
         if not refactored_code:
             raise ValueError("refactored_code content is required")
